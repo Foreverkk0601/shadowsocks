@@ -25,7 +25,7 @@ import signal
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '../'))
 from shadowsocks import shell, daemon, eventloop, tcprelay, udprelay, \
-    asyncdns, manager,traffic_statistics
+    asyncdns, manager,traffic_statistics,httpServer
 
 
 
@@ -70,6 +70,9 @@ def main():
         tcp_servers.append(tcprelay.TCPRelay(a_config, dns_resolver, traffic_s, False))
         udp_servers.append(udprelay.UDPRelay(a_config, dns_resolver, traffic_s, False))
 
+
+
+
     def run_server():
         def child_handler(signum, _):
             logging.warn('received SIGQUIT, doing graceful shutting down..')
@@ -107,6 +110,16 @@ def main():
                 else:
                     children.append(r)
             if not is_child:
+
+                #add flask web run
+                r = os.fork()
+                if r == 0:
+                    # create flask web server
+                    app = httpServer.create_app(traffic_s)
+                    app.run()
+                    return
+
+                children.append(r)
                 def handler(signum, _):
                     for pid in children:
                         try:
@@ -120,11 +133,8 @@ def main():
                 signal.signal(signal.SIGINT, handler)
 
                 # master
-                for a_tcp_server in tcp_servers:
-                    a_tcp_server.close()
-                for a_udp_server in udp_servers:
-                    a_udp_server.close()
-                dns_resolver.close()
+                list(map(lambda s: s.close(),
+                         tcp_servers + udp_servers + [dns_resolver]))
 
                 for child in children:
                     os.waitpid(child, 0)
@@ -132,7 +142,27 @@ def main():
             logging.warn('worker is only available on Unix/Linux')
             run_server()
     else:
-        run_server()
+
+        # add flask web run
+        r = os.fork()
+        if r == 0:
+            # create flask web server
+            app = httpServer.create_app(traffic_s)
+            app.run()
+        else:
+            def handler(signum, _):
+                try:
+                    os.kill(r, signum)
+                    os.waitpid(r, 0)
+                except OSError:  # child may already exited
+                        pass
+                sys.exit()
+
+            signal.signal(signal.SIGTERM, handler)
+            signal.signal(signal.SIGQUIT, handler)
+            signal.signal(signal.SIGINT, handler)
+
+            run_server()
 
 
 if __name__ == '__main__':

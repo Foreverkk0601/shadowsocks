@@ -190,6 +190,7 @@ class TCPRelayHandler(object):
         if not data or not sock:
             return False, 0
         uncomplete = False
+        s = 0
         try:
             l = len(data)
             s = sock.send(data)
@@ -214,6 +215,7 @@ class TCPRelayHandler(object):
                 self._update_stream(STREAM_UP, WAIT_STATUS_WRITING)
             else:
                 logging.error('write_all_to_sock:unknown socket')
+
         else:
             if sock == self._local_sock:
                 self._update_stream(STREAM_DOWN, WAIT_STATUS_READING)
@@ -221,6 +223,7 @@ class TCPRelayHandler(object):
                 self._update_stream(STREAM_UP, WAIT_STATUS_READING)
             else:
                 logging.error('write_all_to_sock:unknown socket')
+
         return True, s
 
     def _handle_stage_connecting(self, data):

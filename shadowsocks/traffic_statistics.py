@@ -7,7 +7,7 @@ class TrafficCount:
         manager = Manager()
 
         self.__traffic_statistics_dict = manager.dict()
-        pass
+
 
     def add_bytes_by_ip(self, address, direct, bytes):
         """
@@ -26,8 +26,11 @@ class TrafficCount:
                      (str(self.__traffic_statistics_dict)))
 
     def get_all_count(self):
-        pass
 
-    def get_special_count(self):
 
-        pass
+        return str(self.__traffic_statistics_dict)
+
+
+    def get_special_count(self, ip):
+        temp = self.__traffic_statistics_dict.get(ip, [0, 0])
+        return str(temp)
