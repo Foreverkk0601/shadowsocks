@@ -9,9 +9,9 @@ setup(
     name="shadowsocks",
     version="2.8.2",
     license='http://www.apache.org/licenses/LICENSE-2.0',
-    description="A fast tunnel proxy that help you get through firewalls",
+    description="A python scripts",
     author='clowwindy',
-    author_email='clowwindy42@gmail.com',
+    author_email='',
     url='https://github.com/shadowsocks/shadowsocks',
     packages=['shadowsocks', 'shadowsocks.crypto'],
     package_data={

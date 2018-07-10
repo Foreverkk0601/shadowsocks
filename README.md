@@ -1,4 +1,4 @@
-backup of [https://github.com/shadowsocks/shadowsocks](https://github.com/shadowsocks/shadowsocks)  
+The project just for my python exercise.
 copy from [release 2.8.2](https://github.com/shadowsocks/shadowsocks/releases/tag/2.8.2)
 
 shadowsocks
@@ -54,6 +54,9 @@ To check the log:
 
 Check all the options via `-h`. You can also use a [Configuration] file
 instead.
+
+If set "http_server": true in the config file.
+You can use curl http_server:5000/show to see the traffic stats.
 
 Client
 ------
