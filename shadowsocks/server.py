@@ -110,16 +110,16 @@ def main():
                 else:
                     children.append(r)
             if not is_child:
+                if config['http_server']:
+                    #add flask web run
+                    r = os.fork()
+                    if r == 0:
+                        # create flask web server
+                        app = httpServer.create_app(traffic_s)
+                        app.run()
+                        return
 
-                #add flask web run
-                r = os.fork()
-                if r == 0:
-                    # create flask web server
-                    app = httpServer.create_app(traffic_s)
-                    app.run()
-                    return
-
-                children.append(r)
+                    children.append(r)
                 def handler(signum, _):
                     for pid in children:
                         try:
@@ -142,28 +142,29 @@ def main():
             logging.warn('worker is only available on Unix/Linux')
             run_server()
     else:
-
+        if config['http_server']:
         # add flask web run
-        r = os.fork()
-        if r == 0:
-            # create flask web server
-            app = httpServer.create_app(traffic_s)
-            app.run()
+            r = os.fork()
+            if r == 0:
+                # create flask web server
+                app = httpServer.create_app(traffic_s)
+                app.run()
+            else:
+                def handler(signum, _):
+                    try:
+                        os.kill(r, signum)
+                        os.waitpid(r, 0)
+                    except OSError:  # child may already exited
+                            pass
+                    sys.exit()
+
+                signal.signal(signal.SIGTERM, handler)
+                signal.signal(signal.SIGQUIT, handler)
+                signal.signal(signal.SIGINT, handler)
+
+                run_server()
         else:
-            def handler(signum, _):
-                try:
-                    os.kill(r, signum)
-                    os.waitpid(r, 0)
-                except OSError:  # child may already exited
-                        pass
-                sys.exit()
-
-            signal.signal(signal.SIGTERM, handler)
-            signal.signal(signal.SIGQUIT, handler)
-            signal.signal(signal.SIGINT, handler)
-
             run_server()
-
 
 if __name__ == '__main__':
     main()

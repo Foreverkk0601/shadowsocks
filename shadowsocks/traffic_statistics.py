@@ -22,15 +22,19 @@ class TrafficCount:
         temp[direct] += bytes
         self.__traffic_statistics_dict[ip] = temp
 
-        logging.info('Traffic_statistics_dict:%s' %
-                     (str(self.__traffic_statistics_dict)))
+        #logging.info('Traffic_statistics_dict:%s' %
+        #             (str(self.__traffic_statistics_dict)))
 
     def get_all_count(self):
 
+        tmp = {}
+        for k,v in self.__traffic_statistics_dict.items():
+            tmp[k] = "%.2f MB,%.2f MB"%(float(v[0])/1024/1024,float(v[1])/1024/1024)
 
-        return str(self.__traffic_statistics_dict)
+        return str(tmp)
 
 
     def get_special_count(self, ip):
+        print(ip)
         temp = self.__traffic_statistics_dict.get(ip, [0, 0])
-        return str(temp)
+        return str("%.2f MB,%.2f MB"%(float(temp[0])/1024/1024,float(temp[1])/1024/1024))
