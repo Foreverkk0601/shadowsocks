@@ -55,6 +55,9 @@ To check the log:
 Check all the options via `-h`. You can also use a [Configuration] file
 instead.
 
+If set "http_server": true in the config file.
+You can use curl http_server:5000/show to see the traffic stats.
+
 Client
 ------
 
